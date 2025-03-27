@@ -17,5 +17,8 @@ async function fetchAddress() {
   const address = `${addressObj?.locality}, ${addressObj?.city} ${addressObj?.postcode}, ${addressObj?.countryName}`;
 
   // 3) Then we return an object with the data that we are interested in
-  return { position, address };
+  return {
+    position,
+    address,
+  };
 }
