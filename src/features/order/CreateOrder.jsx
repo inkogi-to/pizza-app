@@ -1,5 +1,5 @@
 import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
-import { createOrder } from "../../service/apiRestaurant.js"; // https://uibakery.io/regex-library/phone-number
+import { createOrder } from "../../service/apiRestaurant.js";
 import Button from "../../ui/Button.jsx";
 import { useSelector } from "react-redux";
 import { clearCart, getCart, getTotalCartPrice } from "../cart/cartSlice.js";
@@ -7,25 +7,33 @@ import EmptyCart from "../cart/EmptyCart.jsx";
 import store from "../../store.js";
 import { formatCurrency } from "../../utils/helpers.js";
 import { useState } from "react";
-// https://uibakery.io/regex-library/phone-number
+import { useDispatch } from "react-redux";
+import { fetchAddress } from "../user/userSlice.js";
+
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
     str
   );
 
 function CreateOrder() {
-  const username = useSelector((state) => state.user.username);
+  const {
+    username,
+    status: addressStatus,
+    position,
+    address,
+  } = useSelector((state) => state.user);
+
+  const isLoadingAddress = addressStatus === "loading";
 
   const navigate = useNavigation();
   const isSubmitting = navigate.state === "submitting";
-
   const formErrors = useActionData();
-
   const [withPriority, setWithPriority] = useState(false);
   const cart = useSelector(getCart);
   const totalCartPrice = useSelector(getTotalCartPrice);
   const priorityPrice = withPriority ? totalCartPrice * 0.2 : 0;
   const totalPrice = totalCartPrice + priorityPrice;
+  const dispatch = useDispatch();
 
   if (!cart.length) return <EmptyCart />;
 
@@ -57,16 +65,32 @@ function CreateOrder() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 mb-5 sm:flex-row sm:item-center">
+        <div className="relative flex flex-col gap-2 mb-5 sm:flex-row sm:item-center">
           <label className="sm:basis-40">Address</label>
           <div className="grow">
             <input
               className="w-full input"
               type="text"
               name="address"
+              disabled={isLoadingAddress}
+              defaultValue={address}
               required
             />
           </div>
+          {!position.latitude && !position.longitude && (
+            <span className="absolute right-[3px] top-0.5  z-50 md:top-[5px]">
+              <Button
+                disable={isLoadingAddress}
+                type="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(fetchAddress());
+                }}
+              >
+                Get position
+              </Button>
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-5 mb-12">
