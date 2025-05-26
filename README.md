@@ -41,8 +41,7 @@ yarn dev
 ```
 
 ## 🛠️ Built With
-- Next.js - React Framework
-- TypeScript - For type safety
+- React Framework
 - Tailwind CSS - For styling
 - Redux - State management
 
